@@ -1,5 +1,6 @@
 import Joi from 'joi'
 import { StatusCodes } from 'http-status-codes'
+import ApiError from '~/utils/ApiError'
 
 const creatNew = async (req, res, next) => {
   const correctCondition = Joi.object({
@@ -7,17 +8,16 @@ const creatNew = async (req, res, next) => {
     description: Joi.string().required().min(3).max(256).trim().strict()
   })
   try {
-    //json data
-    //console.log(req.body)
+
     //abortEarly: dung som khi co loi, false de tra ve het loi
     await correctCondition.validateAsync(req.body, { abortEarly: false })
-    //next()
-    res.status(StatusCodes.CREATED).json({ message: 'POST from validation: API create new board' })
+    //next la cho phep di tiep toi tang tiep theo
+    next()
+
   } catch (error) {
-    //console.log(error)
-    res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-      errors: new Error(error).message
-    })
+    // const errorMessage = new Error(error).message
+    // const customError = new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, errorMessage)
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
 
 }
