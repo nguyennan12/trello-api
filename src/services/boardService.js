@@ -1,6 +1,8 @@
 /* eslint-disable no-useless-catch */
 import { slugify } from '~/utils/formatters'
 import { boardModel } from '~/models/boardModel'
+import ApiError from '~/utils/ApiError'
+import { StatusCodes } from 'http-status-codes'
 
 //xu ly logic, chi nhan du lieu de xu ly logic, k can dua het req res qua
 const createNew = async (reqBody) => {
@@ -26,6 +28,18 @@ const createNew = async (reqBody) => {
   } catch (error) { throw error }
 }
 
+const getDetail = async (boardId) => {
+  try {
+    const board = await boardModel.getDetail(boardId)
+    if (!board) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'board not found')
+    }
+    return board
+  } catch (error) { throw error }
+
+}
+
 export const boardService = {
-  createNew
+  createNew,
+  getDetail
 }
