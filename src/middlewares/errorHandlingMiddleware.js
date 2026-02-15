@@ -2,7 +2,7 @@
 
 /* eslint-disable no-unused-vars */
 import { StatusCodes } from 'http-status-codes'
-// import { env } from '~/config/environment'
+import { env } from '~/config/environment'
 
 // Middleware xử lý lỗi tập trung trong ứng dụng Back-end NodeJS (ExpressJS)
 export const errorHandlingMiddleware = (err, req, res, next) => {
@@ -17,7 +17,8 @@ export const errorHandlingMiddleware = (err, req, res, next) => {
     stack: err.stack //kiem tra loi nam o dau
   }
   // console.error(responseError)
-  // if (env.BUILD_MODE !== 'dev') delete responseError.stack
+  //khi loi stack o môi trường khac thi xoa hết chỉ giữ lại ở môi trường dev
+  if (env.BUILD_MODE !== 'dev') delete responseError.stack
   // console.error(responseError)
 
   // Trả responseError về phía Front-end
