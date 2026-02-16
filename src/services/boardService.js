@@ -3,6 +3,7 @@ import { slugify } from '~/utils/formatters'
 import { boardModel } from '~/models/boardModel'
 import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
+import { cloneDeep } from 'lodash'
 
 //xu ly logic, chi nhan du lieu de xu ly logic, k can dua het req res qua
 const createNew = async (reqBody) => {
@@ -34,7 +35,17 @@ const getDetail = async (boardId) => {
     if (!board) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'board not found')
     }
-    return board
+
+    const resBoard = cloneDeep(board)
+
+    resBoard.columns.forEach(column => {
+      column.cards = resBoard.cards.filter(card => card.columnId.equals(column._id))
+      // column.cards = resBoard.cards.filter(card => card.columnId.toString() === column._id.toString())
+    });
+
+    delete resBoard.cards
+
+    return resBoard
   } catch (error) { throw error }
 
 }
