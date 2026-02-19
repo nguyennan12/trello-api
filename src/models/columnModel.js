@@ -3,11 +3,12 @@ import { ObjectId, returnDocument } from 'mongodb'
 import { GET_DB } from '~/config/mongodb'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
+const INVALID_UPDATE_FIELDS = ['_id', 'createAt', 'boardId']
 
 // Define Collection (name & schema)
 const COLUMN_COLLECTION_NAME = 'columns'
 const COLUMN_COLLECTION_SCHEMA = Joi.object({
-  boardId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  columndId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   title: Joi.string().required().min(3).max(50).trim().strict(),
 
   // Lưu ý các item trong mảng cardOrderIds là ObjectId nên cần thêm pattern cho chuẩn nhé, (lúc quay video số 57 mình quên nhưng sang đầu video số 58 sẽ có nhắc lại về cái này.)
@@ -29,7 +30,7 @@ const createNew = async (data) => {
     const validData = await validateBeforeCrate(data)
     const newColumn = {
       ...validData,
-      boardId: new ObjectId(validData.boardId)
+      columndId: new ObjectId(validData.columndId)
     }
     const createdColumn = await GET_DB().collection(COLUMN_COLLECTION_NAME).insertOne(newColumn)
     return createdColumn
@@ -56,10 +57,28 @@ const pushCardOrderIds = async (card) => {
   } catch (error) { throw new Error(error) }
 }
 
+const update = async (columndId, updateData) => {
+  try {
+    Object.keys(updateData).forEach(fieldName => {
+      if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
+        delete updateData[fieldName]
+      }
+    })
+    const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(columndId) },
+      { $set: updateData },
+      { ReturnDocument: 'after' }
+    )
+    return result
+  } catch (error) { throw new Error(error) }
+}
+
+
 export const columnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
   createNew,
   findOneById,
-  pushCardOrderIds
+  pushCardOrderIds,
+  update
 }
