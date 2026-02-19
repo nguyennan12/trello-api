@@ -3,7 +3,7 @@ import { slugify } from '~/utils/formatters'
 import { boardModel } from '~/models/boardModel'
 import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, reduce } from 'lodash'
 
 //xu ly logic, chi nhan du lieu de xu ly logic, k can dua het req res qua
 const createNew = async (reqBody) => {
@@ -50,7 +50,20 @@ const getDetail = async (boardId) => {
 
 }
 
+const update = async (boardId, reqBody) => {
+  try {
+    const updateData = {
+      ...reqBody,
+      updateAt: Date.now()
+    }
+    const updatedBoard = await boardModel.update(boardId, updateData)
+    return updatedBoard
+  } catch (error) { throw error }
+
+}
+
 export const boardService = {
   createNew,
-  getDetail
+  getDetail,
+  update
 }
