@@ -4,6 +4,8 @@ import { boardModel } from '~/models/boardModel'
 import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import { cloneDeep, reduce } from 'lodash'
+import { columnModel } from '~/models/columnModel'
+import { cardModel } from '~/models/cardModel'
 
 //xu ly logic, chi nhan du lieu de xu ly logic, k can dua het req res qua
 const createNew = async (reqBody) => {
@@ -59,11 +61,33 @@ const update = async (boardId, reqBody) => {
     const updatedBoard = await boardModel.update(boardId, updateData)
     return updatedBoard
   } catch (error) { throw error }
-
 }
+
+const moveCardToDifferentColumn = async (reqBody) => {
+  try {
+    await columnModel.update(reqBody.prevColumnId, {
+      cardOrderIds: reqBody.prevCardOrderIds,
+      updateAt: Date.now()
+    })
+
+    await columnModel.update(reqBody.nextColumnId, {
+      cardOrderIds: reqBody.nextCardOrderIds,
+      updateAt: Date.now()
+    })
+
+    await cardModel.update(reqBody.currentCardId, {
+      columnId: reqBody.nextColumnId
+
+    })
+
+    return { updateResult: 'Successfully' }
+  } catch (error) { throw error }
+}
+
 
 export const boardService = {
   createNew,
   getDetail,
-  update
+  update,
+  moveCardToDifferentColumn
 }
