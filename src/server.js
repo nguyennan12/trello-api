@@ -1,16 +1,26 @@
+/* eslint-disable no-console */
 
-
+import cookieParser from 'cookie-parser'
 import express from 'express'
 import cors from 'cors'
 import { corsOptions } from './config/cors'
 import exitHook from 'async-exit-hook'
-import { CONNECT_DB, GET_DB, CLOSE_DB } from '~/config/mongodb'
+import { CONNECT_DB, CLOSE_DB } from '~/config/mongodb'
 import { env } from '~/config/environment'
 import { APIs_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
 
 const START_SERVER = () => {
   const app = express()
+
+  //fix Cache form disk cua expressjs
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store')
+    next()
+  })
+
+  //cau hinh cookie parser
+  app.use(cookieParser())
 
   //xu ly cors
   app.use(cors(corsOptions))
@@ -37,7 +47,6 @@ const START_SERVER = () => {
 
     })
   }
-
 
 
   exitHook(() => {
