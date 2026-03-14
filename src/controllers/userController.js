@@ -17,6 +17,14 @@ const verifyAccount = async (req, res, next) => {
   } catch (error) { next(error) }
 }
 
+const update = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const result = await userService.update(userId, req.body)
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) { next(error) }
+}
+
 
 const login = async (req, res, next) => {
   try {
@@ -60,6 +68,7 @@ const refreshToken = async (req, res, next) => {
       sameSite: 'none',
       maxAge: ms('14 day')
     })
+    return res.status(StatusCodes.OK).json(result)
   } catch (error) { throw new ApiError(StatusCodes.FORBIDDEN, 'Please Sign In!') }
 }
 export const userController = {
@@ -67,5 +76,6 @@ export const userController = {
   verifyAccount,
   login,
   logout,
-  refreshToken
+  refreshToken,
+  update
 }

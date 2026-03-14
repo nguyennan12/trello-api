@@ -46,11 +46,11 @@ const verifyAccount = async (reqBody) => {
   try {
     const existUser = await userModel.findOneByEmail(reqBody.email)
     if (!existUser) throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
-    if (existUser.isActivce) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is already active!')
+    if (existUser.isActive) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is already active!')
     if (reqBody.token !== existUser.verifyToken) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Token is invalid!')
 
     const updateData = {
-      isActivce: true,
+      isActive: true,
       verifyToken: null
     }
     const updatedUser = await userModel.update(existUser._id, updateData)
@@ -63,7 +63,7 @@ const login = async (reqBody) => {
   try {
     const existUser = await userModel.findOneByEmail(reqBody.email)
     if (!existUser) throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
-    if (!existUser.isActivce) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not already active!')
+    if (!existUser.isActive) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not already active!')
     if (!bcrypt.compareSync(reqBody.password, existUser.password)) {
       throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your Email or Password iscorrect!')
     }
@@ -105,9 +105,34 @@ const refreshToken = async (clientRefreshToken) => {
   } catch (error) { throw error }
 }
 
+const update = async (userId, reqBody) => {
+  try {
+    const existUser = await userModel.findOneById(userId)
+    if (!existUser) throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
+    if (!existUser.isActive) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not already active!')
+
+    let updatedUser = {}
+    //change pass
+    if (reqBody.new_password && reqBody.current_password) {
+      if (!bcrypt.compareSync(reqBody.current_password, existUser.password)) {
+        throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your Current Password is incorrect!')
+      }
+      updatedUser = await userModel.update(existUser._id, {
+        password: bcrypt.hashSync(reqBody.new_password, 8)
+      })
+    }
+    else {
+      //change other field
+      updatedUser = await userModel.update(existUser._id, reqBody)
+    }
+    return pickUser(updatedUser)
+  } catch (error) { throw error }
+}
+
 export const userService = {
   createNew,
   verifyAccount,
   login,
-  refreshToken
+  refreshToken,
+  update
 }
