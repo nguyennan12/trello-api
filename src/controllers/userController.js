@@ -17,15 +17,6 @@ const verifyAccount = async (req, res, next) => {
   } catch (error) { next(error) }
 }
 
-const update = async (req, res, next) => {
-  try {
-    const userId = req.jwtDecoded._id
-    const result = await userService.update(userId, req.body)
-    res.status(StatusCodes.OK).json(result)
-  } catch (error) { next(error) }
-}
-
-
 const login = async (req, res, next) => {
   try {
     const result = await userService.login(req.body)
@@ -71,6 +62,18 @@ const refreshToken = async (req, res, next) => {
     return res.status(StatusCodes.OK).json(result)
   } catch (error) { throw new ApiError(StatusCodes.FORBIDDEN, 'Please Sign In!') }
 }
+
+
+const update = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const userAvatarFile = req.file
+    // console.log('🚀 ~ update ~ userAvatarFile:', userAvatarFile)
+    const result = await userService.update(userId, req.body, userAvatarFile)
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) { next(error) }
+}
+
 export const userController = {
   createNew,
   verifyAccount,
