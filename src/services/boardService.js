@@ -1,11 +1,12 @@
 /* eslint-disable no-useless-catch */
-import { slugify } from '~/utils/formatters'
-import { boardModel } from '~/models/boardModel'
-import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
-import { cloneDeep, reduce } from 'lodash'
-import { columnModel } from '~/models/columnModel'
+import { cloneDeep } from 'lodash'
+import { boardModel } from '~/models/boardModel'
 import { cardModel } from '~/models/cardModel'
+import { columnModel } from '~/models/columnModel'
+import ApiError from '~/utils/ApiError'
+import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
+import { slugify } from '~/utils/formatters'
 
 //xu ly logic, chi nhan du lieu de xu ly logic, k can dua het req res qua
 const createNew = async (reqBody) => {
@@ -43,7 +44,7 @@ const getDetail = async (boardId) => {
     resBoard.columns.forEach(column => {
       column.cards = resBoard.cards.filter(card => card.columnId.equals(column._id))
       // column.cards = resBoard.cards.filter(card => card.columnId.toString() === column._id.toString())
-    });
+    })
 
     delete resBoard.cards
 
@@ -84,10 +85,21 @@ const moveCardToDifferentColumn = async (reqBody) => {
   } catch (error) { throw error }
 }
 
+const getBoards = async (userId, page, itemsPerPage) => {
+  try {
+    if (!page) page = DEFAULT_PAGE
+    if (!itemsPerPage) itemsPerPage = DEFAULT_ITEMS_PER_PAGE
+
+    const result = await boardModel.getBoards(userId, parseInt(page, 10), parseInt(itemsPerPage, 10))
+    return result
+  } catch (error) { throw error }
+}
+
 
 export const boardService = {
   createNew,
   getDetail,
   update,
-  moveCardToDifferentColumn
+  moveCardToDifferentColumn,
+  getBoards
 }
