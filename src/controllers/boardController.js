@@ -5,11 +5,10 @@ import { boardService } from '~/services/boardService'
 //controller nhan body, query, params, files, cookies, jwtDecoded de dieu huong sang tan service
 const creatnew = async (req, res, next) => {
   try {
-    //json data
-    // console.log(req.body)
+    const userId = req.jwtDecoded._id
 
     //dieu huong sang service
-    const createBoard = await boardService.createNew(req.body)
+    const createBoard = await boardService.createNew(userId, req.body)
     //co ket qua thi tra ve client
     res.status(StatusCodes.CREATED).json(createBoard)
   } catch (error) { next(error) }
@@ -18,7 +17,9 @@ const creatnew = async (req, res, next) => {
 const getDetail = async (req, res, next) => {
   try {
     const boardID = req.params.id
-    const board = await boardService.getDetail(boardID)
+    const userId = req.jwtDecoded._id
+
+    const board = await boardService.getDetail(userId, boardID)
     res.status(StatusCodes.OK).json(board)
   } catch (error) { next(error) }
 }

@@ -9,7 +9,7 @@ import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
 import { slugify } from '~/utils/formatters'
 
 //xu ly logic, chi nhan du lieu de xu ly logic, k can dua het req res qua
-const createNew = async (reqBody) => {
+const createNew = async (userId, reqBody) => {
   try {
     //xu ly logic du lieu
     const newBoard = {
@@ -18,7 +18,7 @@ const createNew = async (reqBody) => {
     }
 
     //goi to tang model de luu ban ghi du lieu vao database
-    const createdBoard = await boardModel.createNew(newBoard)
+    const createdBoard = await boardModel.createNew(userId, newBoard)
     // console.log(createdBoard)
 
     //xuat toan bo ban ghi cua board ra (neu can)
@@ -32,9 +32,9 @@ const createNew = async (reqBody) => {
   } catch (error) { throw error }
 }
 
-const getDetail = async (boardId) => {
+const getDetail = async (userId, boardId) => {
   try {
-    const board = await boardModel.getDetail(boardId)
+    const board = await boardModel.getDetail(userId, boardId)
     if (!board) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'board not found')
     }
